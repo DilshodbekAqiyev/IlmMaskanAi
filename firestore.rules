@@ -1,0 +1,195 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    
+    // -------------------------------------------------------------------------
+    // Primitives
+    // -------------------------------------------------------------------------
+    function isSignedIn() { return request.auth != null; }
+    function isOwner(userId) { return isSignedIn() && request.auth.uid == userId; }
+    function isVerified() { return isSignedIn() && request.auth.token.email_verified == true; }
+    function incoming() { return request.resource.data; }
+    function existing() { return resource.data; }
+    function isValidId(id) { return id is string && id.size() <= 128 && id.matches('^[a-zA-Z0-9_\\-]+$'); }
+    
+    // Master Gate (Default Deny)
+    match /{document=**} {
+      allow read, write: if false;
+    }
+
+    // -------------------------------------------------------------------------
+    // User Rules
+    // -------------------------------------------------------------------------
+    function isValidUser(data) {
+      return data.keys().hasAll(['userId', 'xp', 'level', 'role']) &&
+             data.userId == request.auth.uid &&
+             data.xp is int && data.xp >= 0 &&
+             data.level is int && data.level >= 1 &&
+             data.role in ['student', 'teacher', 'parent'] &&
+             (!('displayName' in data) || (data.displayName is string && data.displayName.size() <= 100)) &&
+             (!('photoURL' in data) || (data.photoURL is string && data.photoURL.size() <= 500)) &&
+             (!('badges' in data) || (data.badges is list && data.badges.size() <= 50)) &&
+             (!('completedMissions' in data) || (data.completedMissions is list && data.completedMissions.size() <= 1000)) &&
+             (!('interests' in data) || (data.interests is list && data.interests.size() <= 20));
+    }
+
+    match /users/{userId} {
+      allow get: if isSignedIn();
+      allow list: if isSignedIn() && (
+        (resource.data.get('role', '') == 'student') || 
+        (resource.data.get('teacherId', '') == request.auth.uid) || 
+        (resource.data.get('parentEmail', '') == request.auth.token.email)
+      );
+      allow create: if isVerified() && isValidUser(incoming());
+      allow update: if isVerified() && isOwner(userId) && isValidUser(incoming()) && (
+        // Prevent role manipulation
+        incoming().role == existing().role &&
+        // Ordinary progress update
+        incoming().diff(existing()).affectedKeys().hasOnly(['xp', 'level', 'badges', 'completedMissions', 'currentMissionId', 'displayName', 'photoURL', 'interests'])
+      );
+    }
+
+    // -------------------------------------------------------------------------
+    // World & Mission Rules (Read-Only for students)
+    // -------------------------------------------------------------------------
+    match /worlds/{worldId} {
+      allow get: if isSignedIn();
+      allow list: if isSignedIn();
+      
+      match /missions/{missionId} {
+        allow get: if isSignedIn();
+        allow list: if isSignedIn();
+      }
+    }
+
+    // -------------------------------------------------------------------------
+    // Submission Rules
+    // -------------------------------------------------------------------------
+    function isValidSubmission(data) {
+      return data.keys().hasAll(['userId', 'missionId', 'code', 'status', 'createdAt']) &&
+             data.userId == request.auth.uid &&
+             data.missionId is string &&
+             data.code is string && data.code.size() <= 50000 &&
+             data.status in ['pending', 'passed', 'failed'] &&
+             data.createdAt == request.time;
+    }
+
+    match /submissions/{submissionId} {
+      allow get: if isSignedIn() && (resource.data.userId == request.auth.uid || isAdmin());
+      allow list: if isSignedIn() && resource.data.userId == request.auth.uid;
+      allow create: if isVerified() && isValidSubmission(incoming());
+      // Submissions are immutable
+      allow update, delete: if false;
+    }
+
+    // -------------------------------------------------------------------------
+    // Team Rules
+    // -------------------------------------------------------------------------
+    function isValidTeam(data) {
+      return data.keys().hasAll(['id', 'name', 'members', 'createdAt']) &&
+             data.name is string && data.name.size() <= 50 &&
+             data.members is list && data.members.size() <= 10 &&
+             data.members.size() > 0 &&
+             data.createdAt == request.time;
+    }
+
+    match /teams/{teamId} {
+      allow get: if isSignedIn() && (request.auth.uid in resource.data.members);
+      allow list: if isSignedIn() && (request.auth.uid in resource.data.members);
+      allow create: if isVerified() && isValidTeam(incoming()) && (request.auth.uid in incoming().members);
+      allow update: if isVerified() && (request.auth.uid in existing().members) && isValidTeam(incoming()) && (
+        incoming().diff(existing()).affectedKeys().hasOnly(['name', 'members', 'projectCode'])
+      );
+    }
+
+    // -------------------------------------------------------------------------
+    // AI Path Rules
+    // -------------------------------------------------------------------------
+    function isValidAIPath(data) {
+      return data.keys().hasAll(['pathTitle', 'description', 'missions']) &&
+             data.pathTitle is string && data.pathTitle.size() <= 200 &&
+             data.description is string && data.description.size() <= 2000 &&
+             data.missions is list && data.missions.size() >= 1 && data.missions.size() <= 40;
+    }
+
+    match /ai_paths/{userId} {
+      allow get: if isSignedIn() && isOwner(userId);
+      allow list: if false; // Only individual access
+      allow create: if isVerified() && isOwner(userId) && isValidAIPath(incoming());
+      allow update: if isVerified() && isOwner(userId) && isValidAIPath(incoming());
+      allow delete: if isOwner(userId);
+    }
+
+    // -------------------------------------------------------------------------
+    // Feedback Rules
+    // -------------------------------------------------------------------------
+    function isValidFeedback(data) {
+      return data.keys().hasAll(['userId', 'missionId', 'difficulty', 'clarity', 'createdAt']) &&
+             data.userId == request.auth.uid &&
+             data.missionId is string &&
+             data.difficulty is int && data.difficulty >= 1 && data.difficulty <= 5 &&
+             data.clarity is int && data.clarity >= 1 && data.clarity <= 5 &&
+             data.createdAt == request.time;
+    }
+
+    match /feedback/{feedbackId} {
+      allow create: if isVerified() && isValidFeedback(incoming());
+      allow get, list, update, delete: if isAdmin();
+    }
+    
+    // -------------------------------------------------------------------------
+    // Collab Session Rules
+    // -------------------------------------------------------------------------
+    function isValidCollabSession(data) {
+      return data.keys().hasAll(['id', 'missionId', 'code', 'creatorId', 'creatorName', 'createdAt', 'updatedAt']) &&
+             data.id is string && data.id.size() <= 128 &&
+             data.missionId is string && data.missionId.size() <= 128 &&
+             data.code is string && data.code.size() <= 50000 &&
+             data.creatorId is string && data.creatorId.size() <= 128 &&
+             data.creatorName is string && data.creatorName.size() <= 100 &&
+             data.createdAt == request.time &&
+             data.updatedAt == request.time;
+    }
+
+    function isValidCollabUpdate(data) {
+      return data.keys().hasAll(['id', 'missionId', 'code', 'creatorId', 'creatorName', 'createdAt', 'updatedAt']) &&
+             data.id is string && data.id.size() <= 128 &&
+             data.missionId is string && data.missionId.size() <= 128 &&
+             data.code is string && data.code.size() <= 50000 &&
+             data.creatorId is string && data.creatorId.size() <= 128 &&
+             data.creatorName is string && data.creatorName.size() <= 100 &&
+             data.updatedAt == request.time;
+    }
+
+    function isValidPresence(data) {
+      return data.keys().hasAll(['userId', 'displayName', 'photoURL', 'lastActive']) &&
+             data.userId == request.auth.uid &&
+             data.displayName is string && data.displayName.size() <= 100 &&
+             data.photoURL is string && data.photoURL.size() <= 500 &&
+             data.lastActive == request.time &&
+             (!('cursorOffset' in data) || (data.cursorOffset is int && data.cursorOffset >= 0));
+    }
+
+    match /collab_sessions/{sessionId} {
+      allow get: if isSignedIn();
+      allow list: if isSignedIn();
+      allow create: if isVerified() && isValidCollabSession(incoming()) && (incoming().creatorId == request.auth.uid);
+      allow update: if isVerified() && isValidCollabUpdate(incoming()) && (
+        incoming().diff(existing()).affectedKeys().hasOnly(['code', 'updatedAt'])
+      );
+      allow delete: if isVerified() && (existing().creatorId == request.auth.uid);
+
+      match /presence/{userId} {
+        allow get: if isSignedIn();
+        allow list: if isSignedIn();
+        allow create, update: if isVerified() && isOwner(userId) && isValidPresence(incoming());
+        allow delete: if isOwner(userId);
+      }
+    }
+
+    // Admin Helper (Optional if needed)
+    function isAdmin() {
+      return isSignedIn() && exists(/databases/$(database)/documents/admins/$(request.auth.uid));
+    }
+  }
+}

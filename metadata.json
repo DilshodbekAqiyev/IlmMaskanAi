@@ -1,0 +1,15 @@
+{
+  "name": "DevEdu: Gamified Learning Platform",
+  "description": "O'zbek tilidagi gamifikatsiya qilingan dasturlashni o'rganish platformasi. HTML, CSS, JS va React yo'nalishlari, real-time code editor, AI Mentor va jamoaviy topshiriqlar mavjud.",
+  "requestFramePermissions": [
+    "camera",
+    "microphone"
+  ],
+  "majorCapabilities": [
+    "Gamified Learning Path",
+    "Real-time Code Editor",
+    "AI-powered Tutoring",
+    "Multiplayer Collaboration",
+    "Progress Dashboard"
+  ]
+}

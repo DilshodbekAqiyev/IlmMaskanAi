@@ -1,0 +1,172 @@
+{
+  "entities": {
+    "User": {
+      "title": "User",
+      "description": "Foydalanuvchi profili va progres ma'lumotlari",
+      "type": "object",
+      "properties": {
+        "userId": { "type": "string" },
+        "displayName": { "type": "string" },
+        "photoURL": { "type": "string" },
+        "xp": { "type": "integer" },
+        "level": { "type": "integer" },
+        "badges": { "type": "array", "items": { "type": "string" } },
+        "completedMissions": { "type": "array", "items": { "type": "string" } },
+        "currentMissionId": { "type": "string" },
+        "role": { "type": "string", "enum": ["student", "teacher", "parent"] },
+        "teacherId": { "type": "string" },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["userId", "xp", "level", "role"]
+    },
+    "World": {
+      "title": "World",
+      "description": "O'quv yo'nalishi (masalan, HTML, JS)",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "title": { "type": "string" },
+        "description": { "type": "string" },
+        "order": { "type": "integer" },
+        "icon": { "type": "string" }
+      }
+    },
+    "Mission": {
+      "title": "Mission",
+      "description": "Dars yoki topshiriq",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "worldId": { "type": "string" },
+        "title": { "type": "string" },
+        "content": { "type": "string" },
+        "xpReward": { "type": "integer" },
+        "templateCode": { "type": "string" },
+        "testLogic": { "type": "string" },
+        "order": { "type": "integer" },
+        "type": { "type": "string", "enum": ["lesson", "quiz", "boss"] }
+      }
+    },
+    "Submission": {
+      "title": "Submission",
+      "description": "Foydalanuvchi tomonidan yuborilgan kod",
+      "type": "object",
+      "properties": {
+        "userId": { "type": "string" },
+        "missionId": { "type": "string" },
+        "code": { "type": "string" },
+        "status": { "type": "string", "enum": ["pending", "passed", "failed"] },
+        "createdAt": { "type": "string", "format": "date-time" }
+      }
+    },
+    "Team": {
+      "title": "Team",
+      "description": "Jamoaviy loyiha va a'zolar",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "name": { "type": "string" },
+        "members": { "type": "array", "items": { "type": "string" } },
+        "projectCode": { "type": "string" },
+        "createdAt": { "type": "string", "format": "date-time" }
+      }
+    },
+    "AIPath": {
+      "title": "AIPath",
+      "description": "Foydalanuvchi uchun generatsiya qilingan shaxsiy o'quv yo'li",
+      "type": "object",
+      "properties": {
+        "pathTitle": { "type": "string" },
+        "description": { "type": "string" },
+        "missions": { 
+          "type": "array", 
+          "items": { 
+            "type": "object",
+            "properties": {
+              "title": { "type": "string" },
+              "description": { "type": "string" },
+              "templateCode": { "type": "string" },
+              "testLogic": { "type": "string" },
+              "youtubeId": { "type": "string" },
+              "xpReward": { "type": "integer" },
+              "difficulty": { "type": "string" }
+            }
+          }
+        },
+        "videos": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "title": { "type": "string" },
+              "youtubeId": { "type": "string" }
+            }
+          }
+        }
+      },
+      "required": ["pathTitle", "description", "missions"]
+    },
+    "CollabSession": {
+      "title": "CollabSession",
+      "description": "Real-time hamkorlikdagi dars kodi va sessiya",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "missionId": { "type": "string" },
+        "code": { "type": "string" },
+        "creatorId": { "type": "string" },
+        "creatorName": { "type": "string" },
+        "updatedAt": { "type": "string", "format": "date-time" },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["id", "missionId", "code", "creatorId"]
+    },
+    "Presence": {
+      "title": "Presence",
+      "description": "Sessiyadagi foydalanuvchining onlayn holati",
+      "type": "object",
+      "properties": {
+        "userId": { "type": "string" },
+        "displayName": { "type": "string" },
+        "photoURL": { "type": "string" },
+        "cursorOffset": { "type": "integer" },
+        "lastActive": { "type": "string", "format": "date-time" }
+      },
+      "required": ["userId", "displayName"]
+    }
+  },
+  "firestore": {
+    "/users/{userId}": {
+      "schema": "User",
+      "description": "Foydalanuvchi ma'lumotlari"
+    },
+    "/worlds/{worldId}": {
+      "schema": "World",
+      "description": "Dunyo ma'lumotlari"
+    },
+    "/worlds/{worldId}/missions/{missionId}": {
+      "schema": "Mission",
+      "description": "Dunyo ichidagi topshiriqlar"
+    },
+    "/submissions/{submissionId}": {
+      "schema": "Submission",
+      "description": "Yuborilgan topshiriqlar"
+    },
+    "/teams/{teamId}": {
+      "schema": "Team",
+      "description": "Jamoalar"
+    },
+    "/ai_paths/{userId}": {
+      "schema": "AIPath",
+      "description": "Foydalanuvchining shaxsiy AI kurslari"
+    },
+    "/collab_sessions/{sessionId}": {
+      "schema": "CollabSession",
+      "description": "Real-time kodlash dars sessiyalari"
+    },
+    "/collab_sessions/{sessionId}/presence/{userId}": {
+      "schema": "Presence",
+      "description": "Foydalanuvchilarning sessiyadagi real-time onlayn mavjudligi"
+    }
+  }
+}
