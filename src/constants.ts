@@ -719,10 +719,12 @@ export const WORLDS: World[] = [
 ];
 
 export const BADGES = [
-  { id: 'first-code', name: 'Birinchi Kod', icon: '🚀' },
-  { id: 'html-ninja', name: 'HTML Ninja', icon: '📜' },
-  { id: 'css-master', name: 'CSS Master', icon: '🎨' },
-  { id: 'js-wizard', name: 'JS Wizard', icon: '⚡' },
-  { id: 'react-hero', name: 'React Hero', icon: '⚛️' },
-  { id: 'streak-7', name: '7 kunlik olov', icon: '🔥' },
+  { id: 'first-code', name: 'Birinchi Kod', icon: '🚀', desc: 'Birinchi marotaba topshiriqni muvaffaqiyatli topshirganda beriladi.' },
+  { id: 'html-ninja', name: 'HTML Ninja', icon: '📜', desc: 'HTML Island bo\'limidagi barcha darslarni to\'liq yakunlaganda beriladi.' },
+  { id: 'css-master', name: 'CSS Master', icon: '🎨', desc: 'CSS Mountains bo\'limidagi barcha darslarni to\'liq yakunlaganda beriladi.' },
+  { id: 'js-wizard', name: 'JS Wizard', icon: '⚡', desc: 'JS City bo\'limidagi barcha darslarni to\'liq yakunlaganda beriladi.' },
+  { id: 'react-hero', name: 'React Hero', icon: '⚛️', desc: 'React Galaxy bo\'limidagi barcha darslarni to\'liq yakunlaganda beriladi.' },
+  { id: 'streak-7', name: '7 kunlik olov', icon: '🔥', desc: 'Ketma-ket 7 kunlik faollik (streak-count) to\'plaganda beriladi.' },
+  { id: 'level-5', name: 'Level 5 Guru', icon: '🎓', desc: 'Dasturlashda 5-darajaga (Level 5) ko\'tarilganda beriladi.' },
+  { id: 'level-10', name: 'Kod Ustasi', icon: '👑', desc: 'Dasturlashda 10-darajaga (Level 10) erishganda beriladi.' },
 ];

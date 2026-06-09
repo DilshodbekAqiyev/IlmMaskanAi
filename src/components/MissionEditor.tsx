@@ -35,6 +35,7 @@ import { motion, AnimatePresence } from 'motion/react';
 import ReactMarkdown from 'react-markdown';
 import { askMentor, generateBonusChallenge, getTopicExplanation } from '../services/geminiService';
 import { checkAndAwardAchievements } from '../services/achievementService';
+import AchievementUnlockedModal from './AchievementUnlockedModal';
 import { BADGES } from '../constants';
 import { clsx, type ClassValue } from 'clsx';
 import { twMerge } from 'tailwind-merge';
@@ -416,7 +417,7 @@ export default function MissionEditor({ mission: initialMission, world, user, on
       const newLevel = calculateLevel(newXp);
 
       // Check for achievements
-      const awarded = await checkAndAwardAchievements(user, mission.id);
+      const awarded = await checkAndAwardAchievements(user, mission.id, newLevel);
       setNewBadges(awarded);
 
       await updateDoc(userRef, {
@@ -1317,6 +1318,12 @@ export default function MissionEditor({ mission: initialMission, world, user, on
           </AnimatePresence>
         </div>
       </div>
+
+      <AnimatePresence>
+        {newBadges.length > 0 && (
+          <AchievementUnlockedModal badgeIds={newBadges} onClose={() => setNewBadges([])} />
+        )}
+      </AnimatePresence>
     </div>
   );
 }

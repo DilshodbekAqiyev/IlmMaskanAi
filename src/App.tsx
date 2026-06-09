@@ -16,6 +16,7 @@ import TeacherDashboard from './components/TeacherDashboard';
 import AiMentorChat from './components/AiMentorChat';
 import UserProfilePage from './components/UserProfilePage';
 import PersonalizedPath from './components/PersonalizedPath';
+import AchievementsPage from './components/AchievementsPage';
 import { clsx, type ClassValue } from 'clsx';
 import { twMerge } from 'tailwind-merge';
 
@@ -23,7 +24,7 @@ function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
 }
 
-type View = 'map' | 'mission' | 'leaderboard' | 'dashboard' | 'profile' | 'personalized';
+type View = 'map' | 'mission' | 'leaderboard' | 'dashboard' | 'profile' | 'personalized' | 'achievements';
 
 interface MissionContext {
   code: string;
@@ -158,6 +159,7 @@ export default function App() {
         {[
           { id: 'map', icon: Map, label: 'Xarita' },
           { id: 'personalized', icon: Sparkles, label: 'AI Kurs' },
+          { id: 'achievements', icon: Award, label: 'Yutuqlar' },
           { id: 'leaderboard', icon: Trophy, label: 'Reyting' },
           { id: 'dashboard', icon: Briefcase, label: 'Boshqaruv' },
           { id: 'profile', icon: User, label: 'Profil' },
@@ -332,6 +334,16 @@ export default function App() {
                 <UserProfilePage user={user} onUpdate={updateProfile} />
               </motion.div>
             )}
+            {view === 'achievements' && (
+              <motion.div
+                key="achievements"
+                initial={{ opacity: 0, scale: 0.95 }}
+                animate={{ opacity: 1, scale: 1 }}
+                className="p-10 h-full overflow-auto relative z-10"
+              >
+                <AchievementsPage user={user} />
+              </motion.div>
+            )}
             {view === 'personalized' && (
               <motion.div
                 key="personalized"
@@ -365,7 +377,7 @@ export default function App() {
       <nav className="md:hidden h-20 bg-zinc-950 border-t border-white/5 fixed bottom-0 w-full flex items-center justify-around px-4 z-40">
         {[
           { id: 'map', icon: Map, label: 'Xarita' },
-          { id: 'personalized', icon: Sparkles, label: 'AI Kurs' },
+          { id: 'achievements', icon: Award, label: 'Yutuqlar' },
           { id: 'leaderboard', icon: Trophy, label: 'Reyting' },
           { id: 'profile', icon: User, label: 'Profil' },
         ].map((item) => (

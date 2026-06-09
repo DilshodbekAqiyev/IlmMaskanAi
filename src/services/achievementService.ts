@@ -2,7 +2,7 @@ import { UserProfile, db } from '../lib/firebase';
 import { doc, updateDoc, arrayUnion } from 'firebase/firestore';
 import { WORLDS } from '../constants';
 
-export async function checkAndAwardAchievements(user: UserProfile, completedMissionId: string): Promise<string[]> {
+export async function checkAndAwardAchievements(user: UserProfile, completedMissionId: string, newLevel?: number): Promise<string[]> {
   const newBadges: string[] = [];
   const allCompleted = [...user.completedMissions, completedMissionId];
 
@@ -37,6 +37,16 @@ export async function checkAndAwardAchievements(user: UserProfile, completedMiss
   // 3. Streak
   if (!user.badges.includes('streak-7') && user.streakCount >= 7) {
     newBadges.push('streak-7');
+  }
+
+  // 4. Level-up Badges
+  if (newLevel) {
+    if (newLevel >= 5 && !user.badges.includes('level-5')) {
+      newBadges.push('level-5');
+    }
+    if (newLevel >= 10 && !user.badges.includes('level-10')) {
+      newBadges.push('level-10');
+    }
   }
 
   if (newBadges.length > 0) {
