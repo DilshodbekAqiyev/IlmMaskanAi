@@ -36,7 +36,16 @@
   @apply bg-white/10 rounded-full hover:bg-white/20;
 }
 
+.light ::-webkit-scrollbar-thumb {
+  @apply bg-zinc-300 rounded-full hover:bg-zinc-400;
+}
+
 .bg-dot-pattern {
   background-image: radial-gradient(rgba(255, 255, 255, 0.1) 1px, transparent 1px);
   background-size: 30px 30px;
 }
+
+.light .bg-dot-pattern {
+  background-image: radial-gradient(rgba(99, 102, 241, 0.15) 1.5px, transparent 1.5px);
+}
+

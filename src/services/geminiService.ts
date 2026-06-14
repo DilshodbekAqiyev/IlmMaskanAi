@@ -12,7 +12,7 @@ const getAI = () => {
 export const askMentor = async (query: string, context?: { code?: string; topic?: string; error?: string; description?: string; selectedCode?: string }) => {
   const ai = getAI();
   const systemInstruction = `
-    Siz DevEdu platformasining AI Mentorisiz. 
+    Siz IlmMaskan platformasining AI Mentorisiz. 
     Platforma O'zbekistondagi yosh dasturchilar uchun mo'ljallangan. 
     Sizning vazifangiz:
     1. HTML, CSS, JavaScript va React mavzularini tushuntirish.

@@ -6,9 +6,10 @@ import { motion } from 'motion/react';
 
 interface TeacherDashboardProps {
   user: UserProfile;
+  theme?: 'light' | 'dark';
 }
 
-export default function TeacherDashboard({ user }: TeacherDashboardProps) {
+export default function TeacherDashboard({ user, theme = 'dark' }: TeacherDashboardProps) {
   const [stats, setStats] = useState({
     totalStudents: 0,
     averageXp: 0,

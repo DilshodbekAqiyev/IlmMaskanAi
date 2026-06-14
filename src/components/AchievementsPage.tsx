@@ -24,8 +24,11 @@ import {
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 
+const cn = (...classes: any[]) => classes.filter(Boolean).join(' ');
+
 interface AchievementsPageProps {
   user: UserProfile;
+  theme?: 'light' | 'dark';
 }
 
 interface Certificate {
@@ -41,7 +44,7 @@ interface Certificate {
   worldIds?: string[];
 }
 
-export default function AchievementsPage({ user }: AchievementsPageProps) {
+export default function AchievementsPage({ user, theme = 'dark' }: AchievementsPageProps) {
   const [selectedBadge, setSelectedBadge] = useState<typeof BADGES[0] | null>(null);
   const [selectedCert, setSelectedCert] = useState<Certificate | null>(null);
   const [copiedLink, setCopiedLink] = useState(false);
@@ -94,8 +97,8 @@ export default function AchievementsPage({ user }: AchievementsPageProps) {
       }
     },
     {
-      id: 'devedu-front-end-professional',
-      title: 'DevEdu professional Front-End dasturchi',
+      id: 'ilmmaskan-front-end-professional',
+      title: 'IlmMaskan professional Front-End dasturchi',
       subtitle: 'Full-Stack Guided Frontend Developer',
       category: 'Professional Sertifikat',
       description: 'Frontend muhandisligining barcha asosiy fanlarini (HTML, CSS, JS, React) muvaffaqiyatli topshirgan holda 5-darajaga (Level 5) ko\'tarilganlik va yuqori mukammallik sertifikati.',
@@ -161,14 +164,20 @@ export default function AchievementsPage({ user }: AchievementsPageProps) {
       `}</style>
 
       {/* Header section with Stats block */}
-      <header className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
+      <header className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6 select-none">
         <div className="space-y-2">
-          <div className="flex items-center gap-2 text-indigo-400 font-bold text-xs uppercase tracking-widest">
+          <div className={cn(
+            "flex items-center gap-2 font-bold text-xs uppercase tracking-widest",
+            theme === 'light' ? "text-indigo-600" : "text-indigo-400"
+          )}>
             <Award className="w-4 h-4" />
             <span>Muvaffaqiyatlar Saroyi</span>
           </div>
-          <h1 className="text-4xl font-extrabold text-white tracking-tight italic uppercase decoration-indigo-500 underline underline-offset-8">Yutuqlar va Sertifikatlar</h1>
-          <p className="text-zinc-400 text-sm font-medium">Barcha nishonlar, darajalar va rasmiy tamomlaganlik sertifikatlaringiz.</p>
+          <h1 className={cn(
+            "text-4xl font-extrabold tracking-tight italic uppercase decoration-indigo-500 underline underline-offset-8",
+            theme === 'light' ? "text-zinc-950" : "text-white"
+          )}>Yutuqlar va Sertifikatlar</h1>
+          <p className={cn("text-sm font-medium", theme === 'light' ? "text-zinc-650" : "text-zinc-400")}>Barcha nishonlar, darajalar va rasmiy tamomlaganlik sertifikatlaringiz.</p>
         </div>
 
         <div className="flex flex-wrap gap-3">
@@ -193,50 +202,67 @@ export default function AchievementsPage({ user }: AchievementsPageProps) {
 
           <button 
             onClick={handleShare}
-            className="px-5 py-2.5 bg-zinc-900 hover:bg-zinc-800 text-zinc-300 hover:text-white rounded-2xl border border-white/5 text-xs font-bold transition-all flex items-center gap-2 cursor-pointer"
+            className={cn(
+              "px-5 py-2.5 rounded-2xl text-xs font-bold transition-all flex items-center gap-2 cursor-pointer border",
+              theme === 'light' 
+                ? "bg-white hover:bg-zinc-100 text-zinc-700 border-zinc-200 shadow-sm" 
+                : "bg-zinc-900 hover:bg-zinc-800 text-zinc-300 hover:text-white border-white/5"
+            )}
           >
-            <Share2 className="w-4 h-4 text-indigo-400" />
-            {copiedLink ? "Havola nuxsalandi!" : "Yutuqlarni ulashish"}
+            <Share2 className="w-4 h-4 text-indigo-500" />
+            {copiedLink ? "Havola nusxalandi!" : "Yutuqlarni ulashish"}
           </button>
         </div>
       </header>
 
       {/* Grid Summary Stats */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6">
-        <div className="bg-zinc-900/40 border border-white/5 rounded-3xl p-6 relative overflow-hidden backdrop-blur-sm">
-          <div className="absolute right-4 bottom-4 opacity-5">
-            <Trophy className="w-20 h-20 text-white" />
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6 select-none">
+        <div className={cn(
+          "border rounded-3xl p-6 relative overflow-hidden backdrop-blur-sm transition-all duration-300",
+          theme === 'light' ? "bg-white border-zinc-200 shadow-sm" : "bg-zinc-900/40 border-white/5"
+        )}>
+          <div className="absolute right-4 bottom-4 opacity-[0.03] dark:opacity-5">
+            <Trophy className="w-20 h-20 text-indigo-500" />
           </div>
-          <span className="text-[10px] text-zinc-500 font-black uppercase tracking-widest block mb-1">Mening Darajam</span>
-          <span className="text-3xl font-black text-indigo-400 block tracking-tight">LVL {currentLevel}</span>
-          <span className="text-[11px] text-zinc-400 mt-2 block">{user.xp.toLocaleString()} XP to'plandi</span>
+          <span className={cn("text-[10px] font-black uppercase tracking-widest block mb-1", theme === 'light' ? "text-zinc-400" : "text-zinc-500")}>Mening Darajam</span>
+          <span className={cn("text-3xl font-black block tracking-tight", theme === 'light' ? "text-indigo-600" : "text-indigo-400")}>LVL {currentLevel}</span>
+          <span className={cn("text-[11px] mt-2 block", theme === 'light' ? "text-zinc-500" : "text-zinc-400")}>{user.xp.toLocaleString()} XP to'plandi</span>
         </div>
 
-        <div className="bg-zinc-900/40 border border-white/5 rounded-3xl p-6 relative overflow-hidden backdrop-blur-sm">
-          <div className="absolute right-4 bottom-4 opacity-5">
-            <Award className="w-20 h-20 text-white" />
+        <div className={cn(
+          "border rounded-3xl p-6 relative overflow-hidden backdrop-blur-sm transition-all duration-300",
+          theme === 'light' ? "bg-white border-zinc-200 shadow-sm" : "bg-zinc-900/40 border-white/5"
+        )}>
+          <div className="absolute right-4 bottom-4 opacity-[0.03] dark:opacity-5">
+            <Award className="w-20 h-20 text-rose-500" />
           </div>
-          <span className="text-[10px] text-zinc-500 font-black uppercase tracking-widest block mb-1">Nishonlar (Badges)</span>
-          <span className="text-3xl font-black text-rose-450 block tracking-tight">{unlockedBadgesCount} / {totalBadges}</span>
-          <span className="text-[11px] text-zinc-400 mt-2 block">{totalBadges - unlockedBadgesCount} ta locked badge</span>
+          <span className={cn("text-[10px] font-black uppercase tracking-widest block mb-1", theme === 'light' ? "text-zinc-400" : "text-zinc-500")}>Nishonlar (Badges)</span>
+          <span className="text-3xl font-black text-rose-500 dark:text-rose-450 block tracking-tight">{unlockedBadgesCount} / {totalBadges}</span>
+          <span className={cn("text-[11px] mt-2 block", theme === 'light' ? "text-zinc-500" : "text-zinc-400")}>{totalBadges - unlockedBadgesCount} ta locked badge</span>
         </div>
 
-        <div className="bg-zinc-900/40 border border-white/5 rounded-3xl p-6 relative overflow-hidden backdrop-blur-sm">
-          <div className="absolute right-4 bottom-4 opacity-5">
-            <FileText className="w-20 h-20 text-white" />
+        <div className={cn(
+          "border rounded-3xl p-6 relative overflow-hidden backdrop-blur-sm transition-all duration-300",
+          theme === 'light' ? "bg-white border-zinc-200 shadow-sm" : "bg-zinc-900/40 border-white/5"
+        )}>
+          <div className="absolute right-4 bottom-4 opacity-[0.03] dark:opacity-5">
+            <FileText className="w-20 h-20 text-emerald-500" />
           </div>
-          <span className="text-[10px] text-zinc-500 font-black uppercase tracking-widest block mb-1 font-sans">Sertifikatlar</span>
-          <span className="text-3xl font-black text-emerald-450 block tracking-tight">{unlockedCertsCount} ta unlocked</span>
-          <span className="text-[11px] text-zinc-400 mt-2 block">{certificates.length - unlockedCertsCount} locked certificate</span>
+          <span className={cn("text-[10px] font-black uppercase tracking-widest block mb-1 font-sans", theme === 'light' ? "text-zinc-400" : "text-zinc-500")}>Sertifikatlar</span>
+          <span className="text-3xl font-black text-emerald-600 dark:text-emerald-450 block tracking-tight">{unlockedCertsCount} ta unlocked</span>
+          <span className={cn("text-[11px] mt-2 block", theme === 'light' ? "text-zinc-500" : "text-zinc-400")}>{certificates.length - unlockedCertsCount} locked certificate</span>
         </div>
 
-        <div className="bg-zinc-900/40 border border-white/5 rounded-3xl p-6 relative overflow-hidden backdrop-blur-sm">
-          <div className="absolute right-4 bottom-4 opacity-5">
-            <CheckCircle2 className="w-20 h-20 text-white" />
+        <div className={cn(
+          "border rounded-3xl p-6 relative overflow-hidden backdrop-blur-sm transition-all duration-300",
+          theme === 'light' ? "bg-white border-zinc-200 shadow-sm" : "bg-zinc-900/40 border-white/5"
+        )}>
+          <div className="absolute right-4 bottom-4 opacity-[0.03] dark:opacity-5">
+            <CheckCircle2 className="w-20 h-20 text-amber-500" />
           </div>
-          <span className="text-[10px] text-zinc-500 font-black uppercase tracking-widest block mb-1">Topshiriqlar</span>
+          <span className={cn("text-[10px] font-black uppercase tracking-widest block mb-1", theme === 'light' ? "text-zinc-400" : "text-zinc-500")}>Topshiriqlar</span>
           <span className="text-3xl font-black text-amber-500 block tracking-tight">{completedMissionsCount} ta yakunlandi</span>
-          <span className="text-[11px] text-zinc-400 mt-2 block">Darslarni o'rganish xaritasi boylab</span>
+          <span className={cn("text-[11px] mt-2 block", theme === 'light' ? "text-zinc-500" : "text-zinc-400")}>Darslarni o'rganish xaritasi boylab</span>
         </div>
       </div>
 
@@ -248,9 +274,14 @@ export default function AchievementsPage({ user }: AchievementsPageProps) {
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
               <span className="w-2 h-2 rounded-full bg-rose-500" />
-              <h3 className="text-lg font-black text-white uppercase tracking-tight italic">Eritilgan nishonlar (Badges)</h3>
+              <h3 className={cn("text-lg font-black uppercase tracking-tight italic", theme === 'light' ? "text-zinc-900" : "text-white")}>
+                Eritilgan nishonlar (Badges)
+              </h3>
             </div>
-            <span className="text-xs text-zinc-400 font-mono font-bold bg-zinc-900 px-3 py-1 rounded-full border border-white/5">{unlockedBadgesCount} ochilgan</span>
+            <span className={cn(
+              "text-xs font-mono font-bold px-3 py-1 rounded-full border",
+              theme === 'light' ? "bg-zinc-100 border-zinc-200 text-zinc-600" : "bg-zinc-900 border-white/5 text-zinc-404"
+            )}>{unlockedBadgesCount} ochilgan</span>
           </div>
 
           <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
@@ -261,36 +292,42 @@ export default function AchievementsPage({ user }: AchievementsPageProps) {
                   key={badge.id}
                   whileHover={{ scale: 1.03 }}
                   onClick={() => setSelectedBadge(badge)}
-                  className={`cursor-pointer p-6 rounded-3xl border transition-all text-center flex flex-col justify-between items-center h-48 relative group ${
+                  className={cn(
+                    "cursor-pointer p-6 rounded-3xl border transition-all text-center flex flex-col justify-between items-center h-48 relative group",
                     isUnlocked 
-                      ? 'bg-zinc-900/60 border-indigo-500/35 hover:border-indigo-500 shadow-lg shadow-indigo-600/[0.04]' 
-                      : 'bg-zinc-900/20 border-white/5 opacity-40 hover:opacity-60'
-                  }`}
+                      ? theme === 'light'
+                        ? "bg-white border-zinc-200 hover:border-indigo-500 hover:shadow-lg shadow-sm"
+                        : "bg-zinc-900/60 border-indigo-500/35 hover:border-indigo-500 shadow-lg shadow-indigo-600/[0.04]" 
+                      : theme === 'light'
+                        ? "bg-zinc-100/40 border-zinc-200/50 opacity-60 hover:opacity-100"
+                        : "bg-zinc-900/20 border-white/5 opacity-40 hover:opacity-60"
+                  )}
                 >
                   {isUnlocked && (
                     <div className="absolute top-3 right-3">
-                      <Sparkles className="w-3.5 h-3.5 text-indigo-400 fill-indigo-400 animate-pulse" />
+                      <Sparkles className="w-3.5 h-3.5 text-indigo-500 fill-indigo-505 animate-pulse" />
                     </div>
                   )}
 
                   <div className="space-y-4 flex flex-col items-center">
-                    <div className={`w-16 h-16 rounded-2xl flex items-center justify-center text-4xl shadow-xl transition-all ${
+                    <div className={cn(
+                      "w-16 h-16 rounded-2xl flex items-center justify-center text-4xl shadow-md transition-all",
                       isUnlocked 
                         ? 'bg-gradient-to-br from-indigo-500/10 to-indigo-600/30' 
-                        : 'bg-zinc-950 text-zinc-600 grayscale'
-                    }`}>
+                        : theme === 'light' ? "bg-zinc-200 text-zinc-400 grayscale" : 'bg-zinc-950 text-zinc-605 grayscale'
+                    )}>
                       {badge.icon}
                     </div>
 
                     <div className="space-y-1">
-                      <h4 className="text-xs font-black text-white uppercase tracking-tighter block leading-snug">{badge.name}</h4>
-                      <p className="text-[9px] text-zinc-500 uppercase tracking-widest font-extrabold">
+                      <h4 className={cn("text-xs font-black uppercase tracking-tighter block leading-snug", theme === 'light' ? "text-zinc-900" : "text-white")}>{badge.name}</h4>
+                      <p className={cn("text-[9px] uppercase tracking-widest font-extrabold", theme === 'light' ? "text-zinc-500" : "text-zinc-500")}>
                         {isUnlocked ? "Eritilgan" : "Bloklangan"}
                       </p>
                     </div>
                   </div>
 
-                  <span className="text-[10px] text-indigo-400 font-bold hover:underline">
+                  <span className={cn("text-[10px] font-bold hover:underline", theme === 'light' ? "text-indigo-600" : "text-indigo-400")}>
                     Batafsil ko'rish
                   </span>
                 </motion.div>
@@ -303,19 +340,24 @@ export default function AchievementsPage({ user }: AchievementsPageProps) {
         <div className="space-y-6">
           <div className="flex items-center gap-2">
             <span className="w-2 h-2 rounded-full bg-indigo-500" />
-            <h3 className="text-lg font-black text-white uppercase tracking-tight italic">Muvaffaqiyat Bosqichlari</h3>
+            <h3 className={cn("text-lg font-black uppercase tracking-tight italic", theme === 'light' ? "text-zinc-900" : "text-white")}>
+              Muvaffaqiyat Bosqichlari
+            </h3>
           </div>
 
-          <div className="bg-zinc-900/50 border border-white/5 rounded-3xl p-8 space-y-6">
+          <div className={cn(
+            "border rounded-3xl p-8 space-y-6 transition-all duration-300",
+            theme === 'light' ? "bg-white border-zinc-200 shadow-sm" : "bg-zinc-900/50 border border-white/5"
+          )}>
             <div className="space-y-4">
               <div className="flex justify-between items-center">
                 <div className="flex items-center gap-2">
                   <span className="p-1 bg-rose-500/10 rounded-lg text-rose-500"><Trophy className="w-3.5 h-3.5" /></span>
-                  <span className="text-xs font-black uppercase text-zinc-300">Nishonlar Progressi</span>
+                  <span className={cn("text-xs font-black uppercase", theme === 'light' ? "text-zinc-650" : "text-zinc-300")}>Nishonlar Progressi</span>
                 </div>
-                <span className="text-xs font-mono font-bold text-white">{Math.round((unlockedBadgesCount / totalBadges) * 100)}%</span>
+                <span className={cn("text-xs font-mono font-bold", theme === 'light' ? "text-zinc-855 text-zinc-800" : "text-white")}>{Math.round((unlockedBadgesCount / totalBadges) * 100)}%</span>
               </div>
-              <div className="h-1.5 bg-zinc-950 rounded-full overflow-hidden">
+              <div className={cn("h-1.5 rounded-full overflow-hidden", theme === 'light' ? "bg-zinc-100" : "bg-zinc-950")}>
                 <div className="h-full bg-rose-500 rounded-full" style={{ width: `${(unlockedBadgesCount / totalBadges) * 100}%` }} />
               </div>
             </div>
@@ -324,11 +366,11 @@ export default function AchievementsPage({ user }: AchievementsPageProps) {
               <div className="flex justify-between items-center">
                 <div className="flex items-center gap-2">
                   <span className="p-1 bg-indigo-500/10 rounded-lg text-indigo-500"><Zap className="w-3.5 h-3.5" /></span>
-                  <span className="text-xs font-black uppercase text-zinc-300">Leveling Tracker</span>
+                  <span className={cn("text-xs font-black uppercase", theme === 'light' ? "text-zinc-650" : "text-zinc-300")}>Leveling Tracker</span>
                 </div>
-                <span className="text-xs font-mono font-bold text-white">LVL {currentLevel}</span>
+                <span className={cn("text-xs font-mono font-bold", theme === 'light' ? "text-zinc-800" : "text-white")}>LVL {currentLevel}</span>
               </div>
-              <div className="h-1.5 bg-zinc-950 rounded-full overflow-hidden">
+              <div className={cn("h-1.5 rounded-full overflow-hidden", theme === 'light' ? "bg-zinc-100" : "bg-zinc-950")}>
                 <div 
                   className="h-full bg-indigo-500 rounded-full" 
                   style={{ 
@@ -344,20 +386,20 @@ export default function AchievementsPage({ user }: AchievementsPageProps) {
               <p className="text-[10px] text-zinc-500 italic block">Navbatdagi darajaga o'tish uchun yana topshiriqlarni bajaring hamda XP to'plang.</p>
             </div>
 
-            <div className="border-t border-white/5 pt-6 space-y-4">
+            <div className={cn("border-t pt-6 space-y-4", theme === 'light' ? "border-zinc-150 border-zinc-100" : "border-white/5")}>
               <h4 className="text-[10px] font-black uppercase text-zinc-400 tracking-wider">Tezkor Ma'lumot</h4>
               <div className="space-y-3">
                 <div className="flex justify-between text-xs">
-                  <span className="text-zinc-500 font-medium">Faollik streaki:</span>
-                  <span className="text-emerald-400 font-extrabold">{user.streakCount || 0} kun</span>
+                  <span className="text-zinc-500 font-medium font-sans">Faollik streaki:</span>
+                  <span className="text-emerald-500 font-extrabold">{user.streakCount || 0} kun</span>
                 </div>
                 <div className="flex justify-between text-xs">
                   <span className="text-zinc-500 font-medium">Sessiya ishtiroki:</span>
-                  <span className="text-indigo-400 font-extrabold">Real-time Collab tayyor</span>
+                  <span className={cn("font-extrabold", theme === 'light' ? "text-indigo-600" : "text-indigo-400")}>Real-time Collab tayyor</span>
                 </div>
                 <div className="flex justify-between text-xs">
-                  <span className="text-zinc-500 font-medium font-sans">Sertifikatlar mavjud:</span>
-                  <span className="text-indigo-400 font-extrabold">{unlockedCertsCount} ta</span>
+                  <span className="text-zinc-500 font-medium">Sertifikatlar mavjud:</span>
+                  <span className={cn("font-extrabold", theme === 'light' ? "text-indigo-600" : "text-indigo-400")}>{unlockedCertsCount} ta</span>
                 </div>
               </div>
             </div>
@@ -369,7 +411,9 @@ export default function AchievementsPage({ user }: AchievementsPageProps) {
       <div className="space-y-6 pt-6">
         <div className="flex items-center gap-2">
           <span className="w-2 h-2 rounded-full bg-emerald-500" />
-          <h3 className="text-2xl font-black text-white uppercase tracking-tight italic">DevEdu Akademiyasi Sertifikatlari</h3>
+          <h3 className={cn("text-2xl font-black uppercase tracking-tight italic", theme === 'light' ? "text-zinc-900" : "text-white")}>
+            IlmMaskan Akademiyasi Sertifikatlari
+          </h3>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -378,55 +422,68 @@ export default function AchievementsPage({ user }: AchievementsPageProps) {
             return (
               <div
                 key={cert.id}
-                className={`p-8 rounded-[36px] border transition-all flex flex-col justify-between ${
+                className={cn(
+                  "p-8 rounded-[36px] border transition-all flex flex-col justify-between duration-300",
                   isUnlocked 
-                    ? 'bg-zinc-900/60 border-emerald-500/20 shadow-xl shadow-emerald-500/[0.01]' 
-                    : 'bg-zinc-900/10 border-white/5 opacity-55'
-                }`}
+                    ? theme === 'light'
+                      ? "bg-white border-emerald-500/20 shadow-md shadow-emerald-500/[0.02]"
+                      : "bg-zinc-900/60 border-emerald-500/20 shadow-xl shadow-emerald-500/[0.01]" 
+                    : theme === 'light'
+                      ? "bg-zinc-100/40 border-zinc-200/50 opacity-60"
+                      : "bg-zinc-900/10 border-white/5 opacity-55"
+                )}
               >
                 <div className="space-y-5">
                   <div className="flex items-center justify-between">
-                    <span className={`px-3 py-1 rounded-lg text-[9px] font-black uppercase tracking-widest border ${
+                    <span className={cn(
+                      "px-3 py-1 rounded-lg text-[9px] font-black uppercase tracking-widest border",
                       isUnlocked 
-                        ? 'bg-emerald-500/10 border-emerald-500/20 text-emerald-400' 
-                        : 'bg-zinc-950 border-white/5 text-zinc-500'
-                    }`}>
+                        ? theme === 'light'
+                          ? "bg-emerald-50 border-emerald-250 text-emerald-600"
+                          : "bg-emerald-500/10 border-emerald-500/20 text-emerald-400" 
+                        : theme === 'light'
+                          ? "bg-zinc-200/50 border-zinc-300/40 text-zinc-500"
+                          : "bg-zinc-950 border-white/5 text-zinc-500"
+                    )}>
                       {cert.category}
                     </span>
                     {isUnlocked ? (
-                      <span className="flex items-center gap-1 text-emerald-500 font-bold text-xs">
+                      <span className="flex items-center gap-1 text-emerald-650 dark:text-emerald-500 font-bold text-xs">
                         <CheckCircle2 className="w-4 h-4" /> Unlocked
                       </span>
                     ) : (
-                      <span className="flex items-center gap-1 text-zinc-500 font-bold text-xs">
+                      <span className="flex items-center gap-1 text-zinc-400 dark:text-zinc-500 font-bold text-xs">
                         <Lock className="w-3.5 h-3.5" /> Locked
                       </span>
                     )}
                   </div>
 
                   <div className="space-y-2">
-                    <h4 className="text-lg font-black text-white tracking-tight">{cert.title}</h4>
-                    <span className="text-xs text-zinc-500 block leading-none font-mono tracking-wider">{cert.subtitle}</span>
-                    <p className="text-xs text-zinc-400 leading-relaxed pt-2">{cert.description}</p>
+                    <h4 className={cn("text-lg font-black tracking-tight", theme === 'light' ? "text-zinc-950" : "text-white")}>{cert.title}</h4>
+                    <span className={cn("text-xs block leading-none font-mono tracking-wider", theme === 'light' ? "text-zinc-500" : "text-zinc-500")}>{cert.subtitle}</span>
+                    <p className={cn("text-xs leading-relaxed pt-2", theme === 'light' ? "text-zinc-600" : "text-zinc-400")}>{cert.description}</p>
                   </div>
                 </div>
 
-                <div className="border-t border-white/5 pt-6 mt-6 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                <div className={cn(
+                  "border-t pt-6 mt-6 flex flex-col sm:flex-row sm:items-center justify-between gap-4",
+                  theme === 'light' ? "border-zinc-100" : "border-white/5"
+                )}>
                   <div className="space-y-1">
-                    <span className="text-[9px] font-black text-zinc-500 uppercase tracking-widest leading-none block">Taqdim etilish talabi</span>
-                    <span className="text-xs font-semibold text-zinc-300 block">{cert.requirementsText}</span>
+                    <span className={cn("text-[9px] font-black uppercase tracking-widest leading-none block", theme === 'light' ? "text-zinc-400" : "text-zinc-500")}>Taqdim etilish talabi</span>
+                    <span className={cn("text-xs font-semibold block", theme === 'light' ? "text-zinc-700" : "text-zinc-300")}>{cert.requirementsText}</span>
                   </div>
 
                   {isUnlocked ? (
                     <button
                       onClick={() => setSelectedCert(cert)}
-                      className="px-5 py-3 bg-emerald-600 hover:bg-emerald-500 text-white font-extrabold uppercase text-[10px] tracking-widest rounded-xl transition-all shadow-lg shadow-emerald-600/10 flex items-center justify-center gap-2 whitespace-nowrap"
+                      className="px-5 py-3 bg-emerald-600 hover:bg-emerald-500 text-white font-extrabold uppercase text-[10px] tracking-widest rounded-xl transition-all shadow-lg shadow-emerald-600/10 flex items-center justify-center gap-2 whitespace-nowrap cursor-pointer"
                     >
                       <FileText className="w-4 h-4" />
                       Sertifikatni ochish
                     </button>
                   ) : (
-                    <span className="text-[10px] text-zinc-500 font-bold uppercase tracking-widest">Kurs yakunlanmagan</span>
+                    <span className={cn("text-[10px] font-bold uppercase tracking-widest", theme === 'light' ? "text-zinc-400" : "text-zinc-500")}>Kurs yakunlanmagan</span>
                   )}
                 </div>
               </div>
@@ -438,40 +495,64 @@ export default function AchievementsPage({ user }: AchievementsPageProps) {
       {/* Interactive Badge Details Modal */}
       <AnimatePresence>
         {selectedBadge && (
-          <div className="fixed inset-0 bg-zinc-950/80 backdrop-blur-md flex items-center justify-center p-6 z-50">
+          <div className="fixed inset-0 bg-black/85 backdrop-blur-md flex items-center justify-center p-6 z-50" onClick={() => setSelectedBadge(null)}>
             <motion.div
               initial={{ scale: 0.95, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
               exit={{ scale: 0.95, opacity: 0 }}
-              className="bg-zinc-900 border border-white/5 rounded-[40px] max-w-sm w-full p-8 text-center space-y-6 relative overflow-hidden"
+              className={cn(
+                "border rounded-[40px] max-w-sm w-full p-8 text-center space-y-6 relative overflow-hidden transition-all duration-300",
+                theme === 'light' ? "bg-white border-zinc-200 text-zinc-800 shadow-2xl" : "bg-zinc-900 border border-white/5 text-white"
+              )}
+              onClick={(e) => e.stopPropagation()}
             >
               <button 
                 onClick={() => setSelectedBadge(null)}
-                className="absolute top-6 right-6 text-zinc-500 hover:text-white transition-colors"
+                className={cn(
+                  "absolute top-6 right-6 transition-colors cursor-pointer",
+                  theme === 'light' ? "text-zinc-400 hover:text-zinc-800" : "text-zinc-500 hover:text-white"
+                )}
               >
                 <X className="w-5 h-5" />
               </button>
 
-              <div className="w-24 h-24 bg-indigo-500/10 border border-indigo-500/20 rounded-[32px] flex items-center justify-center text-5xl mx-auto shadow-2xl">
+              <div className={cn(
+                "w-24 h-24 rounded-[32px] flex items-center justify-center text-5xl mx-auto shadow-xl border",
+                theme === 'light' ? "bg-indigo-50 border-indigo-100" : "bg-indigo-500/10 border border-indigo-500/20"
+              )}>
                 {selectedBadge.icon}
               </div>
 
               <div className="space-y-2">
-                <h3 className="text-xl font-black text-white uppercase tracking-tight">{selectedBadge.name}</h3>
-                <span className={`px-3 py-1 rounded-full text-[9px] font-extrabold uppercase tracking-widest border inline-block ${
+                <h3 className={cn("text-xl font-black uppercase tracking-tight", theme === 'light' ? "text-zinc-950" : "text-white")}>
+                  {selectedBadge.name}
+                </h3>
+                <span className={cn(
+                  "px-3 py-1 rounded-full text-[9px] font-extrabold uppercase tracking-widest border inline-block",
                   user.badges.includes(selectedBadge.id)
-                    ? 'bg-indigo-500/10 text-indigo-400 border-indigo-500/25'
-                    : 'bg-zinc-950 text-zinc-500 border-white/5'
-                }`}>
+                    ? theme === 'light'
+                      ? 'bg-indigo-50 text-indigo-600 border-indigo-150'
+                      : 'bg-indigo-500/10 text-indigo-400 border-indigo-500/25'
+                    : theme === 'light'
+                      ? 'bg-zinc-100 text-zinc-405 border-zinc-200'
+                      : 'bg-zinc-950 text-zinc-500 border-white/5'
+                )}>
                   {user.badges.includes(selectedBadge.id) ? "Sizda mavjud" : "Bloklangan"}
                 </span>
               </div>
 
-              <p className="text-zinc-400 text-xs leading-relaxed">{selectedBadge.desc}</p>
+              <p className={cn("text-xs leading-relaxed", theme === 'light' ? "text-zinc-650" : "text-zinc-400")}>
+                {selectedBadge.desc}
+              </p>
 
               <button
                 onClick={() => setSelectedBadge(null)}
-                className="w-full py-4 bg-zinc-800 hover:bg-zinc-700 text-white font-extrabold uppercase tracking-widest text-[10px] rounded-2xl transition-colors"
+                className={cn(
+                  "w-full py-4 font-extrabold uppercase tracking-widest text-[10px] rounded-2xl transition-colors cursor-pointer",
+                  theme === 'light'
+                    ? "bg-zinc-100 hover:bg-zinc-200 text-zinc-800 border-zinc-250 border"
+                    : "bg-zinc-800 hover:bg-zinc-700 text-white"
+                )}
               >
                 Yopish
               </button>
@@ -527,9 +608,9 @@ export default function AchievementsPage({ user }: AchievementsPageProps) {
                 <div className="text-center space-y-4">
                   <div className="flex justify-center items-center gap-2 mb-2">
                     <div className="w-10 h-10 bg-zinc-900 rounded-xl flex items-center justify-center font-bold text-white text-base">
-                      DE
+                      IM
                     </div>
-                    <span className="text-xs uppercase font-extrabold tracking-[0.25em] text-zinc-800">DevEdu Akademiyasi</span>
+                    <span className="text-xs uppercase font-extrabold tracking-[0.25em] text-zinc-800">IlmMaskan Akademiyasi</span>
                   </div>
                   
                   <div className="bg-zinc-900 h-0.5 w-16 mx-auto mb-4" />
@@ -564,8 +645,8 @@ export default function AchievementsPage({ user }: AchievementsPageProps) {
                       D. Jonaqiyev
                     </div>
                     <div className="border-t border-zinc-300 pt-1.5">
-                      <span className="text-[9px] uppercase tracking-wider font-extrabold text-zinc-800 block leading-tight">DevEdu Asoschisi</span>
-                      <span className="text-[8px] text-zinc-400 block">DevEdu Academy Uzbek</span>
+                      <span className="text-[9px] uppercase tracking-wider font-extrabold text-zinc-800 block leading-tight">IlmMaskan Asoschisi</span>
+                      <span className="text-[8px] text-zinc-400 block">IlmMaskan Academy Uzbek</span>
                     </div>
                   </div>
 

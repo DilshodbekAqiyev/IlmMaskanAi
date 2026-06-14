@@ -65,9 +65,10 @@ interface MissionEditorProps {
   onClose: () => void;
   onComplete: (xp: number) => void;
   onUpdateContext?: (code: string, error: string, selectedCode?: string) => void;
+  theme?: 'light' | 'dark';
 }
 
-export default function MissionEditor({ mission: initialMission, world, user, onClose, onComplete, onUpdateContext }: MissionEditorProps) {
+export default function MissionEditor({ mission: initialMission, world, user, onClose, onComplete, onUpdateContext, theme = 'dark' }: MissionEditorProps) {
   const editorRef = useRef<any>(null);
   const [mission, setMission] = useState(initialMission);
   const [code, setCode] = useState('');

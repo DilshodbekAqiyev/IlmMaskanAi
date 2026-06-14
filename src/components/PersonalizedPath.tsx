@@ -15,6 +15,7 @@ function cn(...inputs: ClassValue[]) {
 interface PersonalizedPathProps {
   user: UserProfile;
   onStartMission: (mission: Mission, world: World) => void;
+  theme?: 'light' | 'dark';
 }
 
 interface AIPathMission {
@@ -33,7 +34,7 @@ interface GeneratedPath {
   missions: AIPathMission[];
 }
 
-export default function PersonalizedPath({ user, onStartMission }: PersonalizedPathProps) {
+export default function PersonalizedPath({ user, onStartMission, theme = 'dark' }: PersonalizedPathProps) {
   const [loading, setLoading] = useState(false);
   const [isSyncing, setIsSyncing] = useState(true);
   const [path, setPath] = useState<GeneratedPath | null>(null);

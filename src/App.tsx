@@ -6,7 +6,7 @@
 import React, { useState, useEffect } from 'react';
 import { auth, db, googleProvider, syncUserProfile, UserProfile, calculateLevel } from './lib/firebase';
 import { signInWithPopup, onAuthStateChanged, signOut } from 'firebase/auth';
-import { Trophy, Map, Users, Settings, Code, Award, Home, Star, MessageSquare, Briefcase, Zap, Palette, Layout, Atom, LogOut, ChevronRight, User, Sparkles } from 'lucide-react';
+import { Trophy, Map, Users, Settings, Code, Award, Home, Star, MessageSquare, Briefcase, Zap, Palette, Layout, Atom, LogOut, ChevronRight, User, Sparkles, Calendar, Sun, Moon } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { WORLDS, World, Mission } from './constants';
 import LearningMap from './components/LearningMap';
@@ -17,6 +17,7 @@ import AiMentorChat from './components/AiMentorChat';
 import UserProfilePage from './components/UserProfilePage';
 import PersonalizedPath from './components/PersonalizedPath';
 import AchievementsPage from './components/AchievementsPage';
+import DailyChallenge from './components/DailyChallenge';
 import { clsx, type ClassValue } from 'clsx';
 import { twMerge } from 'tailwind-merge';
 
@@ -24,7 +25,7 @@ function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
 }
 
-type View = 'map' | 'mission' | 'leaderboard' | 'dashboard' | 'profile' | 'personalized' | 'achievements';
+type View = 'map' | 'mission' | 'leaderboard' | 'dashboard' | 'profile' | 'personalized' | 'achievements' | 'daily-challenge';
 
 interface MissionContext {
   code: string;
@@ -39,6 +40,21 @@ export default function App() {
   const [activeWorld, setActiveWorld] = useState<World | null>(null);
   const [activeMission, setActiveMission] = useState<Mission | null>(null);
   const [missionContext, setMissionContext] = useState<MissionContext>({ code: '', error: '', selectedCode: '' });
+  const [theme, setTheme] = useState<'dark' | 'light'>(() => {
+    const saved = localStorage.getItem('theme');
+    return (saved === 'light' || saved === 'dark') ? saved : 'dark';
+  });
+
+  useEffect(() => {
+    localStorage.setItem('theme', theme);
+    // Sync with HTML/Body element for system-wide light theme support if needed
+    const body = document.body;
+    if (theme === 'light') {
+      body.classList.add('light');
+    } else {
+      body.classList.remove('light');
+    }
+  }, [theme]);
 
   const handleUpdateContext = React.useCallback((code: string, error: string, selectedCode?: string) => {
     setMissionContext({ code, error, selectedCode });
@@ -130,7 +146,7 @@ export default function App() {
             <Code className="w-12 h-12 text-indigo-500" />
           </div>
           <div className="space-y-2">
-            <h1 className="text-4xl font-bold text-white tracking-tight italic underline-offset-8 decoration-indigo-500 underline">DevEdu</h1>
+            <h1 className="text-4xl font-bold text-white tracking-tight italic underline-offset-8 decoration-indigo-500 underline">IlmMaskan</h1>
             <p className="text-zinc-500 text-lg">
               Dasturlashni o'yin kulgi bilan o'rganing. Elegant va qorong'u rejimda.
             </p>
@@ -149,15 +165,22 @@ export default function App() {
   }
 
   return (
-    <div className="h-screen flex bg-zinc-950 overflow-hidden font-sans text-slate-200">
+    <div className={cn(
+      "h-screen flex overflow-hidden font-sans transition-colors duration-300",
+      theme === 'light' ? "bg-zinc-100 text-zinc-900" : "bg-zinc-950 text-slate-200"
+    )}>
       {/* Sidebar - Desktop */}
-      <nav className="w-20 h-full bg-zinc-950 border-r border-white/5 hidden md:flex flex-col items-center py-8 gap-8">
+      <nav className={cn(
+        "w-20 h-full hidden md:flex flex-col items-center py-8 gap-8 transition-colors duration-300",
+        theme === 'light' ? "bg-white border-r border-zinc-200" : "bg-zinc-950 border-r border-white/5"
+      )}>
         <div className="w-10 h-10 bg-indigo-600 rounded-xl flex items-center justify-center font-bold text-white shadow-lg shadow-indigo-600/20 mb-4">
           DE
         </div>
         
         {[
           { id: 'map', icon: Map, label: 'Xarita' },
+          { id: 'daily-challenge', icon: Calendar, label: 'Kun vazifasi' },
           { id: 'personalized', icon: Sparkles, label: 'AI Kurs' },
           { id: 'achievements', icon: Award, label: 'Yutuqlar' },
           { id: 'leaderboard', icon: Trophy, label: 'Reyting' },
@@ -171,44 +194,78 @@ export default function App() {
             aria-current={view === item.id ? 'page' : undefined}
             className={cn(
               "p-3 rounded-xl transition-all relative group",
-              view === item.id ? "bg-indigo-600 text-white shadow-[0_0_20px_rgba(79,70,229,0.3)]" : "text-zinc-500 hover:text-white"
+              view === item.id 
+                ? "bg-indigo-600 text-white shadow-[0_0_20px_rgba(79,70,229,0.3)]" 
+                : theme === 'light' 
+                  ? "text-zinc-400 hover:text-zinc-900 hover:bg-zinc-100/50" 
+                  : "text-zinc-500 hover:text-white"
             )}
           >
             <item.icon className="w-6 h-6 font-medium" />
-            <span className="absolute left-full ml-4 px-3 py-1 bg-zinc-800 text-white text-[10px] uppercase font-bold tracking-widest rounded-md opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap z-50 pointer-events-none">
+            <span className={cn(
+              "absolute left-full ml-4 px-3 py-1 text-[10px] uppercase font-bold tracking-widest rounded-md opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap z-50 pointer-events-none shadow-md",
+              theme === 'light' ? "bg-white text-zinc-800 border border-zinc-200" : "bg-zinc-805 bg-zinc-800 text-white"
+            )}>
               {item.label}
             </span>
           </button>
         ))}
 
-        <div className="mt-auto pt-8 border-t border-white/5 space-y-4">
+        <div className={cn("mt-auto pt-8 space-y-4 w-full flex flex-col items-center", theme === 'light' ? "border-t border-zinc-200" : "border-t border-white/5")}>
+          {/* Direct Sun/Moon toggle button */}
+          <button
+            onClick={() => setTheme(prev => prev === 'light' ? 'dark' : 'light')}
+            className={cn(
+              "p-3 rounded-xl transition-all relative group",
+              theme === 'light' ? "text-amber-500 hover:bg-amber-500/10" : "text-zinc-500 hover:text-amber-400"
+            )}
+            title={theme === 'light' ? "Tungi rejimga o'tish" : "Kunduzgi rejimga o'tish"}
+          >
+            {theme === 'light' ? <Moon className="w-6 h-6 fill-indigo-500 text-indigo-500" /> : <Sun className="w-6 h-6" />}
+          </button>
+
           <button
             onClick={() => setView('profile')}
             className={cn(
                "p-3 rounded-xl transition-all relative group",
-               view === 'profile' ? "bg-indigo-600 text-white shadow-[0_0_20px_rgba(79,70,229,0.3)]" : "text-zinc-500 hover:text-white"
+               view === 'profile' 
+                 ? "bg-indigo-600 text-white shadow-[0_0_20px_rgba(79,70,229,0.3)]" 
+                 : theme === 'light' 
+                   ? "text-zinc-400 hover:text-zinc-900 hover:bg-zinc-100/50" 
+                   : "text-zinc-500 hover:text-white"
             )}
+            aria-label="Sozlamalar bo'limiga o'tish"
           >
             <Settings className="w-6 h-6" />
           </button>
+          
           <button
             onClick={handleLogout}
-            className="p-3 rounded-xl text-zinc-500 hover:bg-red-500/10 hover:text-red-500 transition-all"
+            className={cn(
+              "p-3 rounded-xl transition-all",
+              theme === 'light' 
+                ? "text-zinc-400 hover:bg-red-50 hover:text-red-500" 
+                : "text-zinc-500 hover:bg-red-500/10 hover:text-red-500"
+            )}
+            aria-label="Tizimdan chiqish"
           >
             <LogOut className="w-6 h-6" />
           </button>
         </div>
       </nav>
 
-      <main className="flex-1 h-full overflow-hidden flex flex-col relative">
+      <main className="flex-1 h-full overflow-hidden flex flex-col relative transition-colors duration-300">
         {/* Header */}
-        <header className="h-16 bg-zinc-900/50 border-b border-white/10 px-8 flex items-center justify-between shrink-0 backdrop-blur-sm">
+        <header className={cn(
+          "h-16 px-8 flex items-center justify-between shrink-0 backdrop-blur-sm transition-colors duration-300 z-30",
+          theme === 'light' ? "bg-white/80 border-b border-zinc-200" : "bg-zinc-900/50 border-b border-white/10"
+        )}>
           <div className="flex items-center gap-4">
             <div className="flex flex-col">
-              <span className="text-[10px] font-bold text-zinc-500 uppercase tracking-[0.2em]">Foydalanuvchi darajasi</span>
+              <span className={cn("text-[10px] font-bold uppercase tracking-[0.2em]", theme === 'light' ? "text-zinc-400" : "text-zinc-500")}>Foydalanuvchi darajasi</span>
               <div className="flex items-center gap-2">
                 <span className="text-xs font-mono text-indigo-400 font-bold">LVL {calculateLevel(user.xp)}</span>
-                <div className="w-32 h-1.5 bg-zinc-800 rounded-full overflow-hidden">
+                <div className={cn("w-32 h-1.5 rounded-full overflow-hidden", theme === 'light' ? "bg-zinc-200" : "bg-zinc-800")}>
                   <div 
                     className="h-full bg-indigo-500 transition-all duration-500" 
                     style={{ 
@@ -228,7 +285,7 @@ export default function App() {
 
           <div className="flex items-center gap-8">
             {/* Daily Streak */}
-            <div className="flex flex-col items-end border-r border-white/10 pr-6">
+            <div className={cn("flex flex-col items-end border-r pr-6", theme === 'light' ? "border-zinc-200" : "border-white/10")}>
               <div className="flex items-center gap-2">
                 <motion.div
                   animate={{ 
@@ -239,31 +296,34 @@ export default function App() {
                 >
                   <Sparkles className={cn("w-4 h-4", user.streakCount > 0 ? "text-orange-400 fill-orange-400" : "text-zinc-600")} />
                 </motion.div>
-                <span className={cn("font-bold tracking-tight", user.streakCount > 0 ? "text-white" : "text-zinc-500")}>
+                <span className={cn("font-bold tracking-tight text-sm", user.streakCount > 0 ? theme === 'light' ? "text-zinc-900" : "text-white" : "text-zinc-500")}>
                   {user.streakCount} kunlik streak
                 </span>
               </div>
-              <span className="text-[10px] text-zinc-500 font-bold uppercase tracking-widest">Faollik</span>
+              <span className={cn("text-[10px] font-bold uppercase tracking-widest", theme === 'light' ? "text-zinc-400" : "text-zinc-500")}>Faollik</span>
             </div>
 
             <div className="flex flex-col items-end">
                <div className="flex items-center gap-2">
                   <Zap className="w-4 h-4 text-orange-500 fill-orange-500" />
-                  <span className="font-bold text-white tracking-tight">{user.xp.toLocaleString()} XP</span>
+                  <span className={cn("font-bold tracking-tight text-sm", theme === 'light' ? "text-zinc-900" : "text-white")}>{user.xp.toLocaleString()} XP</span>
                </div>
-               <span className="text-[10px] text-zinc-500 font-bold uppercase tracking-widest">Jami ball topildi</span>
+               <span className={cn("text-[10px] font-bold uppercase tracking-widest", theme === 'light' ? "text-zinc-400" : "text-zinc-500")}>Jami ball topildi</span>
             </div>
             
-            <div className="flex items-center gap-3 border-l border-white/10 pl-6">
+            <div className={cn("flex items-center gap-3 border-l pl-6", theme === 'light' ? "border-zinc-200" : "border-white/10")}>
               <div className="text-right hidden sm:block">
-                <div className="text-sm font-medium leading-none text-white">{user.displayName}</div>
-                <div className="text-[10px] text-zinc-500 font-bold uppercase mt-1">
+                <div className={cn("text-sm font-medium leading-none", theme === 'light' ? "text-zinc-900" : "text-white")}>{user.displayName}</div>
+                <div className={cn("text-[10px] font-bold uppercase mt-1", theme === 'light' ? "text-zinc-400" : "text-zinc-500")}>
                   {user.role === 'teacher' ? 'Usta Mentor' : user.xp > 1000 ? 'Silver Ninja' : 'Bronze Student'}
                 </div>
               </div>
               <div 
                 onClick={() => setView('profile')}
-                className="w-10 h-10 rounded-full border-2 border-white/20 overflow-hidden bg-gradient-to-br from-indigo-500 to-purple-600 shadow-lg shadow-indigo-500/10 cursor-pointer active:scale-95 transition-transform"
+                className={cn(
+                  "w-10 h-10 rounded-full border-2 overflow-hidden bg-gradient-to-br from-indigo-500 to-purple-600 shadow-lg cursor-pointer active:scale-95 transition-transform",
+                  theme === 'light' ? "border-zinc-300 shadow-zinc-200" : "border-white/20 shadow-indigo-500/10"
+                )}
               >
                 <img src={user.photoURL || `https://api.dicebear.com/7.x/avataaars/svg?seed=${user.userId}`} alt="Profile" referrerPolicy="no-referrer" />
               </div>
@@ -272,8 +332,13 @@ export default function App() {
         </header>
 
         {/* Content Area */}
-        <div className="flex-1 overflow-auto bg-[radial-gradient(circle_at_center,_var(--tw-gradient-stops))] from-zinc-800/10 via-zinc-950 to-zinc-950 relative">
-          <div className="absolute inset-0 bg-dot-pattern opacity-10 pointer-events-none" />
+        <div className={cn(
+          "flex-1 overflow-auto relative transition-colors duration-300",
+          theme === 'light' 
+            ? "bg-zinc-50 bg-[radial-gradient(circle_at_center,_var(--tw-gradient-stops))] from-zinc-200/50 via-zinc-100 to-zinc-50" 
+            : "bg-[radial-gradient(circle_at_center,_var(--tw-gradient-stops))] from-zinc-800/10 via-zinc-950 to-zinc-950"
+        )}>
+          <div className={cn("absolute inset-0 bg-dot-pattern pointer-events-none transition-opacity", theme === 'light' ? "opacity-3" : "opacity-10")} />
           <AnimatePresence mode="wait">
             {view === 'map' && (
               <motion.div
@@ -283,7 +348,7 @@ export default function App() {
                 exit={{ opacity: 0 }}
                 className="h-full relative z-10"
               >
-                <LearningMap worlds={WORLDS} user={user} onStartMission={startMission} />
+                <LearningMap worlds={WORLDS} user={user} onStartMission={startMission} theme={theme} />
               </motion.div>
             )}
             {view === 'mission' && activeMission && activeWorld && (
@@ -301,6 +366,7 @@ export default function App() {
                   onClose={handleCloseMission}
                   onUpdateContext={handleUpdateContext}
                   onComplete={handleCompleteMission}
+                  theme={theme}
                 />
               </motion.div>
             )}
@@ -311,7 +377,7 @@ export default function App() {
                 animate={{ opacity: 1 }}
                 className="p-10 h-full overflow-auto relative z-10"
               >
-                <Leaderboard />
+                <Leaderboard theme={theme} />
               </motion.div>
             )}
             {view === 'dashboard' && (
@@ -321,7 +387,7 @@ export default function App() {
                 animate={{ opacity: 1 }}
                 className="p-10 h-full overflow-auto relative z-10"
               >
-                <TeacherDashboard user={user} />
+                <TeacherDashboard user={user} theme={theme} />
               </motion.div>
             )}
             {view === 'profile' && (
@@ -331,7 +397,7 @@ export default function App() {
                 animate={{ opacity: 1, scale: 1 }}
                 className="p-10 h-full overflow-auto relative z-10"
               >
-                <UserProfilePage user={user} onUpdate={updateProfile} />
+                <UserProfilePage user={user} onUpdate={updateProfile} theme={theme} setTheme={setTheme} />
               </motion.div>
             )}
             {view === 'achievements' && (
@@ -341,7 +407,7 @@ export default function App() {
                 animate={{ opacity: 1, scale: 1 }}
                 className="p-10 h-full overflow-auto relative z-10"
               >
-                <AchievementsPage user={user} />
+                <AchievementsPage user={user} theme={theme} />
               </motion.div>
             )}
             {view === 'personalized' && (
@@ -351,21 +417,34 @@ export default function App() {
                 animate={{ opacity: 1, scale: 1 }}
                 className="p-10 h-full overflow-auto relative z-10"
               >
-                <PersonalizedPath user={user} onStartMission={startMission} />
+                <PersonalizedPath user={user} onStartMission={startMission} theme={theme} />
+              </motion.div>
+            )}
+            {view === 'daily-challenge' && (
+              <motion.div
+                key="daily-challenge"
+                initial={{ opacity: 0, scale: 0.95 }}
+                animate={{ opacity: 1, scale: 1 }}
+                className="p-10 h-full overflow-auto relative z-10"
+              >
+                <DailyChallenge user={user} onUpdateProfile={updateProfile} theme={theme} />
               </motion.div>
             )}
           </AnimatePresence>
         </div>
 
         {/* Info Bar / Footer */}
-        <footer className="h-8 bg-zinc-950 border-t border-white/5 flex items-center px-6 justify-between text-[10px] font-mono text-zinc-500 shrink-0">
+        <footer className={cn(
+          "h-8 border-t flex items-center px-6 justify-between text-[10px] font-mono shrink-0 transition-colors duration-300",
+          theme === 'light' ? "bg-white border-zinc-200 text-zinc-500" : "bg-zinc-950 border-white/5 text-zinc-500"
+        )}>
           <div className="flex gap-4">
             <span className="flex items-center gap-1.5"><span className="w-1.5 h-1.5 rounded-full bg-emerald-500 shadow-[0_0_8px_#10b981]"></span> AI Cloud: Connected</span>
-            <span className="border-l border-white/10 pl-4">{activeMission ? `Mission: ${activeMission.title}` : 'Xarita bo\'ylab sayohat'}</span>
+            <span className={cn("border-l pl-4", theme === 'light' ? "border-zinc-200" : "border-white/10")}>{activeMission ? `Mission: ${activeMission.title}` : 'Xarita bo\'ylab sayohat'}</span>
           </div>
           <div className="flex gap-4">
             <span className="text-indigo-400 font-bold">Boss Challenge: 3 kun qoldi</span>
-            <span className="hover:text-white cursor-pointer transition-colors border-l border-white/10 pl-4">Yordam kerakmi?</span>
+            <span className={cn("hover:text-indigo-600 cursor-pointer transition-colors border-l pl-4", theme === 'light' ? "border-zinc-200" : "border-white/10")}>Yordam kerakmi?</span>
           </div>
         </footer>
 
@@ -374,9 +453,13 @@ export default function App() {
       </main>
 
       {/* Bottom Nav - Mobile */}
-      <nav className="md:hidden h-20 bg-zinc-950 border-t border-white/5 fixed bottom-0 w-full flex items-center justify-around px-4 z-40">
+      <nav className={cn(
+        "md:hidden h-20 border-t fixed bottom-0 w-full flex items-center justify-around px-4 z-40 transition-colors duration-300",
+        theme === 'light' ? "bg-white border-zinc-200" : "bg-zinc-950 border-white/5"
+      )}>
         {[
           { id: 'map', icon: Map, label: 'Xarita' },
+          { id: 'daily-challenge', icon: Calendar, label: 'Kun vazifasi' },
           { id: 'achievements', icon: Award, label: 'Yutuqlar' },
           { id: 'leaderboard', icon: Trophy, label: 'Reyting' },
           { id: 'profile', icon: User, label: 'Profil' },
@@ -387,7 +470,11 @@ export default function App() {
             aria-label={`${item.label} bo'limiga o'tish`}
             className={cn(
               "p-3 rounded-xl transition-all",
-              view === item.id ? "bg-indigo-600 text-white shadow-lg shadow-indigo-600/30" : "text-zinc-500"
+              view === item.id 
+                ? "bg-indigo-600 text-white shadow-lg shadow-indigo-600/30" 
+                : theme === 'light' 
+                  ? "text-zinc-400 hover:text-zinc-900" 
+                  : "text-zinc-500 hover:text-white"
             )}
           >
             <item.icon className="w-6 h-6" />
