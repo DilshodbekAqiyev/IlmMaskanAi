@@ -1,8 +1,8 @@
 {
   "projectId": "gen-lang-client-0710393482",
   "appId": "1:1099503531432:web:d12b7e6c4a8018443c599d",
-  "apiKey": "AIzaSyCyv7rEg856A6S-t2wZpQJ2ZVj8ycMCkys",
-  "authDomain": "https://ilm-maskan-ai.vercel.app/",
+  "apiKey": "AIzaSyBPk5EC0U01--YN8e14ZcpIvJb3wA2UKj4",
+  "authDomain": "ilm-maskan-ai.vercel.app",
   "firestoreDatabaseId": "ai-studio-0f0c724f-0776-4702-940c-f28f605daf49",
   "storageBucket": "gen-lang-client-0710393482.firebasestorage.app",
   "messagingSenderId": "1099503531432",
