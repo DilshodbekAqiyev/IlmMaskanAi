@@ -5,7 +5,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { auth, db, googleProvider, syncUserProfile, UserProfile, calculateLevel } from './lib/firebase';
-import { signInWithPopup, onAuthStateChanged, signOut } from 'firebase/auth';
+import { signInWithPopup, onAuthStateChanged, signOut, signInWithRedirect, getRedirectResult } from 'firebase/auth';
 import { Trophy, Map, Users, Settings, Code, Award, Home, Star, MessageSquare, Briefcase, Zap, Palette, Layout, Atom, LogOut, ChevronRight, User, Sparkles, Calendar, Sun, Moon } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { WORLDS, World, Mission } from './constants';
@@ -61,6 +61,28 @@ export default function App() {
   }, []);
 
   useEffect(() => {
+    // Check redirect results first in case of a successful fallback sign in
+    getRedirectResult(auth)
+      .then(async (result) => {
+        if (result?.user) {
+          const profile = await syncUserProfile(result.user);
+          setUser(profile);
+        }
+      })
+      .catch((error) => {
+        console.error("Redirect Sign-in Error:", error);
+        if (error.code === 'auth/unauthorized-domain') {
+          alert(
+            "Xatolik: Ushbu veb-sayt manzili (domeni) Firebase'da ruxsat etilgan domenlar ro'yxatiga qo'shilmagan.\n\n" +
+            "Yechim:\n" +
+            "1. Firebase Console -> Authentication -> Settings -> Authorized Domains sahifasiga kiring.\n" +
+            "2. Hozirgi saytingiz domenini (masalan, Vercel manzilingizni) ro'yxatga qo'shing."
+          );
+        } else {
+          alert(`Redirect orqali tizimga kirishda xatolik: ${error.message}`);
+        }
+      });
+
     const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
       if (firebaseUser) {
         const profile = await syncUserProfile(firebaseUser);
@@ -84,10 +106,33 @@ export default function App() {
       await signInWithPopup(auth, googleProvider);
     } catch (error: any) {
       console.error("Login Error Details:", error);
-      if (error.code === 'auth/network-request-failed') {
+      if (error.code === 'auth/popup-blocked') {
+        console.log("Popup blocked! Attempting automatic fallback via signInWithRedirect...");
+        try {
+          alert(
+            "Brauzeringizda xavfsizlik filtri yoki popup oyna to'siqlari yoqilgan shekilli (Popup Blocked).\n\n" +
+            "Tizimga avtomatik ravishda Redirect (sahifani qayta yo'naltirish) orqali kirishga urinib ko'ramiz..."
+          );
+          await signInWithRedirect(auth, googleProvider);
+        } catch (redirectError: any) {
+          console.error("Redirect Error:", redirectError);
+          alert(
+            `Kutilmagan xatolik yuz berdi: ${redirectError.message}\n\n` +
+            `Yechim: Sayt manzilini Firebase Console -> Authentication -> Settings -> Authorized Domains ro'yxatiga qo'shing hamda brauzerda pop-up oynalarga ruxsat bering.`
+          );
+        }
+      } else if (error.code === 'auth/network-request-failed') {
         alert("Tarmoq xatosi (network-request-failed). Iltimos, sahifani yangilang yoki adblocker/VPN ni o'chirib ko'ring.");
+      } else if (error.code === 'auth/unauthorized-domain') {
+        alert(
+          "Xatolik (unauthorized-domain): Ushbu sayt domeni Firebase Auth tomonidan ruxsat berilgan ro'yxatda mavjud emas.\n\n" +
+          "Yechim: Firebase Console -> Authentication -> Settings -> Authorized Domains qismiga hozirgi domen manzilingizni qoshishingiz kerak."
+        );
       } else {
-        alert(`Tizimga kirishda xatolik: ${error.message}`);
+        alert(
+          `Tizimga kirishda xatolik yuz berdi: ${error.message}\n\n` +
+          `Eslatma: Agar sayt Vercel platformasida bo'lsa, ushbu domenni Firebase Console dagi ruxsat berilgan domenlar (Authorized Domains) ro'yxatiga qo'shish kerak.`
+        );
       }
     }
   };
